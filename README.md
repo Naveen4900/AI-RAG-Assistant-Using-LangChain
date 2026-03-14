@@ -1,3 +1,9 @@
+![Python](https://img.shields.io/badge/Python-3.10-blue)
+![LangChain](https://img.shields.io/badge/LangChain-RAG-green)
+![LLM](https://img.shields.io/badge/LLM-Mixtral-orange)
+![VectorDB](https://img.shields.io/badge/VectorDB-Chroma-purple)
+![License](https://img.shields.io/badge/License-IBM-yellow)
+
 # AI RAG Assistant using LangChain
 
 An AI-powered **Retrieval-Augmented Generation (RAG) assistant** that answers user questions using information extracted from uploaded PDF documents.
@@ -40,15 +46,15 @@ The application includes an interactive web interface where users can upload PDF
 ## System Architecture
 
 User Query
-↓
+->
 Embedding Model
-↓
+->
 Vector Database (Chroma)
-↓
+->
 Relevant Document Retrieval
-↓
+->
 Large Language Model
-↓
+->
 Generated Response
 
 ---
@@ -114,7 +120,7 @@ The system will retrieve relevant sections from the document and generate an ans
 ## Author
 
 Naveen Chowdary
-AI/ML Engineer | Data Science Enthusiast
+AI/ML  Enthusiast
 
 ---
 
