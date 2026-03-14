@@ -1,116 +1,123 @@
-# AI-RAG-Assistant-Using-LangChain
-from ibm_watsonx_ai.foundation_models import ModelInference
-from ibm_watsonx_ai.metanames import GenTextParamsMetaNames as GenParams
-from ibm_watsonx_ai.metanames import EmbedTextParamsMetaNames
-from ibm_watsonx_ai import Credentials
-from langchain_ibm import WatsonxLLM, WatsonxEmbeddings
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_community.vectorstores import Chroma
-from langchain_community.document_loaders import PyPDFLoader
-from langchain.chains import RetrievalQA
+# AI RAG Assistant using LangChain
 
-import gradio as gr
-import warnings
+An AI-powered **Retrieval-Augmented Generation (RAG) assistant** that answers user questions using information extracted from uploaded PDF documents.
+The system combines **Large Language Models (LLMs)** with **vector embeddings** to retrieve relevant document context and generate accurate responses.
 
-# Suppress warnings
-def warn(*args, **kwargs):
-    pass
+---
 
-warnings.warn = warn
-warnings.filterwarnings('ignore')
+## Project Overview
 
-# Set up credentials and project_id
-credentials = Credentials(
-    url="https://us-south.ml.cloud.ibm.com",
-    api_key="your_api_key_here"  # Replace this with your actual API key
-)
-project_id = "skills-network"
+This project implements a **document-based Question Answering system** using a Retrieval-Augmented Generation (RAG) pipeline.
 
-## LLM
-def get_llm():
-    model_id = 'mistralai/mixtral-8x7b-instruct-v01'
-    parameters = {
-        GenParams.MAX_NEW_TOKENS: 256,
-        GenParams.TEMPERATURE: 0.5,
-    }
-    watsonx_llm = WatsonxLLM(
-        model_id=model_id,
-        url=credentials.url,
-        project_id=project_id,
-        params=parameters,
-    )
-    return watsonx_llm
+Instead of relying only on pretrained model knowledge, the assistant retrieves relevant information from uploaded documents and provides context-aware answers.
 
-## Document loader
-def document_loader(file):
-    loader = PyPDFLoader(file.name)
-    loaded_document = loader.load()
-    return loaded_document
+The application includes an interactive web interface where users can upload PDFs and ask questions.
 
-## Text splitter
-def text_splitter(data):
-    text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=1000,
-        chunk_overlap=100,
-        length_function=len,
-    )
-    chunks = text_splitter.split_documents(data)
-    return chunks
+---
 
-## Embedding model
-def watsonx_embedding():
-    embed_params = {
-        EmbedTextParamsMetaNames.INPUT: None,
-        EmbedTextParamsMetaNames.TRUNCATE_INPUT_TOKENS: "none"
-    }
+## Features
 
-    watsonx_embedding = WatsonxEmbeddings(
-        model_id="ibm/slate-125m-english-embeddings",
-        url=credentials.url,
-        project_id=project_id,
-        params=embed_params,
-    )
-    return watsonx_embedding
+* Document-based Question Answering
+* Retrieval-Augmented Generation (RAG)
+* Semantic document search using embeddings
+* Large Language Model response generation
+* Interactive chatbot interface
+* PDF document ingestion
 
-## Vector db
-def vector_database(chunks):
-    embedding_model = watsonx_embedding()
-    vectordb = Chroma.from_documents(documents=chunks, embedding=embedding_model)
-    return vectordb
+---
 
-## Retriever
-def retriever(file):
-    splits = document_loader(file)
-    chunks = text_splitter(splits)
-    vectordb = vector_database(chunks)
-    retriever = vectordb.as_retriever()
-    return retriever
+## Tech Stack
 
-## QA Chain
-def retriever_qa(file, query):
-    llm = get_llm()
-    retriever_obj = retriever(file)
-    qa = RetrievalQA.from_chain_type(
-        llm=llm,
-        chain_type="stuff",
-        retriever=retriever_obj,
-        return_source_documents=True
-    )
-    response = qa.invoke({"query": query})
-    return response['result']
+* Python
+* LangChain
+* IBM watsonx.ai
+* Chroma Vector Database
+* Gradio (Web Interface)
+* Mistral / Mixtral LLM
 
-# Create Gradio interface
-rag_application = gr.Interface(
-    fn=retriever_qa,
-    allow_flagging="never",
-    inputs=[
-        gr.File(label="Upload PDF File", file_count="single", file_types=['.pdf'], type="filepath"),
-        gr.Textbox(label="Input Query", lines=2, placeholder="Type your question here...")
-    ],
-    outputs=gr.Textbox(label="Answer"),
-    title="Document-based QA Bot",
-    description="Upload a PDF document and ask any question. The chatbot will try to answer using the provided document."
-)
+---
 
-# Launch the app
-rag_application.launch(server_name="0.0.0.0", server_port=7860)
+## System Architecture
+
+User Query
+↓
+Embedding Model
+↓
+Vector Database (Chroma)
+↓
+Relevant Document Retrieval
+↓
+Large Language Model
+↓
+Generated Response
+
+---
+
+## How It Works
+
+1. User uploads a PDF document.
+2. The document is split into smaller text chunks.
+3. Each chunk is converted into embeddings.
+4. The embeddings are stored in a vector database.
+5. When the user asks a question:
+
+   * The system retrieves relevant document chunks.
+   * The retrieved context is passed to the LLM.
+6. The LLM generates a response based on the retrieved knowledge.
+
+---
+
+## Installation
+
+Clone the repository
+
+git clone https://github.com/Naveen4900/AI-RAG-Assistant-Using-LangChain.git
+
+Navigate to the project folder
+
+cd AI-RAG-Assistant-Using-LangChain
+
+Install dependencies
+
+pip install -r requirements.txt
+
+---
+
+## Run the Application
+
+python app.py
+
+After running the script, the Gradio interface will launch in your browser.
+
+---
+
+## Example Use Case
+
+Upload a research paper or technical document and ask questions like:
+
+"What are the main conclusions of this paper?"
+
+The system will retrieve relevant sections from the document and generate an answer.
+
+---
+
+## Future Improvements
+
+* Add support for multiple document uploads
+* Implement hybrid search (BM25 + embeddings)
+* Add conversation memory
+* Deploy the application using Docker or cloud services
+* Integrate with larger vector databases
+
+---
+
+## Author
+
+Naveen Chowdary
+AI/ML Engineer | Data Science Enthusiast
+
+---
+
+## License
+
+This project is open-source and available under the MIT License.
